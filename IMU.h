@@ -1,7 +1,7 @@
 #ifndef IMU_H
 #define IMU_H
 
-#include "Sensors.h"
+#include "structures.h"
 #include <Arduino.h>
 
 class IMU
@@ -12,8 +12,12 @@ class IMU
     
     /*** A appeler à chaque loop ***/
     void Update(vector3f gyroData, vector3f accData);
+    /*** Calcule la vitesse selon les 3 axes ***/
+    void ComputeSpeed(vector3f accData);
     /*** Retourne les valeurs d'angle d'euler ***/
     vector3f GetEulerAngles();
+    /*** Renvoie la vitesse actuelle selon les 3 axes ***/
+    vector3f GetVelocity();
     
     /*** Kalman Filtering ***/
     float KalmanFilter(float accAngle, float gyroData, float previousAngle, float looptime);
@@ -35,6 +39,13 @@ class IMU
     float tau;
     
     float accFilterConstant;
+    
+    //Pour calculer la vitesse
+     vector3f velocity;
+     vector3f accDataNoG[2];
+     int speedloop_time1;
+     int speedloop_time2;
+     int speedloop_time;
   
   
   /*
@@ -71,7 +82,5 @@ class IMU
   float  y, S;
   float K_0, K_1;
 };
-
-extern IMU imu;
 
 #endif

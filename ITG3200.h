@@ -4,17 +4,15 @@
 #include "structures.h"
 #include <Arduino.h>
 
-class Sensors
+class ITG3200
 {
   public :
-  Sensors();
-  ~Sensors();
+  ITG3200();
+  ~ITG3200();
   /*** Initialise les capteurs ***/
-  void Init();
+  void Configure();
   /*** Pour calibrer le gyro ***/
-  void CalibrateGyro();
-  /*** Pour calibrer l'accelerometre ***/
-  void CalibrateAcc();
+  void Calibrate();
   /*** Pour tester si les capteurs sont actifs ***/
   byte IsActive();
   
@@ -25,29 +23,18 @@ class Sensors
   vector3f GetGyroData();
   /*** Renvoie la valeur d'angle produite par intégration ***/
   vector3f GetGyroAngles();
-  /*** Renvoie la dernière valeur connue des données de l'accelero ***/
-  vector3f GetAccData();
   
   /*** Integration runge kutta 4 ***/
   float RK4Integrate(int data4, int data3, int data2, int data1, int deltaTmillis);
   
-  
+  //Pour lire les valeurs brutes du gyro
+  void ReadRawAngularRotation();
   
   private :
-  //Pour lire les valeurs du gyro
-  void ReadGyros();
-  //Pour lire les données de l'acc
-  void ReadAccs();
   
   vector3f gyroData[4];
   vector3f gyroZero;
   vector3f gyroAngles;
-  
-  //Les coordonnées x et y sont des offsets, le z n'est normalement pas utilisé
-  vector3f accZero;
-  float accGain;
-  
-  vector3f accData;
   
   int previousTime;
   int currentTime;
@@ -56,11 +43,7 @@ class Sensors
   //Le buffer de reception
   byte outbuf[6];
   
-  long int measuresCountGyro;
-  long int measuresCountAcc;
-
+  long int measuresCount;
 };
-
-extern Sensors Sensor;
 
 #endif

@@ -1,13 +1,23 @@
 #include <Wire.h>
 #include "structures.h"
-#include "Sensors.h"
+#include "BMA180.h"
+#include "ITG3200.h"
 #include "IMU.h"
+
+BMA180 accelerometers;
+ITG3200 gyroscopes;
+IMU imu;
 
 void setup()
 {
   Serial.begin(115200);
   Wire.begin();
-  Sensor.Init();
+  
+  accelerometers.Configure();
+  //accelerometers.Calibrate();
+  
+  gyroscopes.Configure();
+  gyroscopes.Calibrate();
 }
 
 void loop()
@@ -15,20 +25,22 @@ void loop()
   vector3f gyrodata;
   vector3f eulerAngles;
   vector3f accdata;
+  vector3f velocity;
   
   //1 - On récupère les valeurs des capteurs
-  Sensor.UpdateData();
+  accelerometers.UpdateData(true,false);
+  gyroscopes.UpdateData();
   
   //La valeur de l'accéléromètre orienté verticalement au repos doit être 1000 (=1G)
   //Les valeurs des accéléromètres sont en mg
-  
+  accdata = accelerometers.GetAcceleration();
   //Les valeurs des gyroscopes au repos doivent être 0
   //Les valeurs des gyros doivent être en degrees/s
-  gyrodata = Sensor.GetGyroData();
-  accdata = Sensor.GetAccData();
-  
-  //2 - On met à jour les valeurs calculées d'angle
+  gyrodata = gyroscopes.GetGyroData();
+    
+  //2 - On met à jour les valeurs calculées par la centrale inertielle
   imu.Update(gyrodata,accdata);
+  //imu.ComputeSpeed(accdata);
   
   //3 - On récupère les valeurs des commandes provenant de la télécommande
   
@@ -39,9 +51,15 @@ void loop()
   
   
   eulerAngles = imu.GetEulerAngles();
-  
-  
-  Serial.print( gyrodata.x);
+  velocity = imu.GetVelocity();
+  /*
+  Serial.print(velocity.x);
+  Serial.print(",");
+  Serial.print(velocity.y);
+  Serial.print(",");
+  Serial.print(velocity.z);*/
+
+  Serial.print(gyrodata.x);
   Serial.print(",");
   Serial.print(gyrodata.y);
   Serial.print(",");
@@ -58,6 +76,6 @@ void loop()
   Serial.print(eulerAngles.y);
   Serial.print(",");
   Serial.println(eulerAngles.z);
-  delay(10);
+  delay(30);
   
 }
