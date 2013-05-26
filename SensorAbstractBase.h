@@ -14,14 +14,14 @@ class SensorAbstractBase
 
   virtual void Configure() = 0;
   virtual void Calibrate() = 0;
-  virtual long int Get ReadingsCount() const;
-  virtual boolean IsAlive() = 0 const;
+  virtual long int GetReadingsCount() const;
+  virtual boolean IsAlive() const = 0;
   virtual void ProcessData() = 0;
   virtual void Read() = 0;
 
   protected :
 
-  long int readingsCount;
+  long int m_readingsCount;
 
 };
 

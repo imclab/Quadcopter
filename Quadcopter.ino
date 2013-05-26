@@ -4,8 +4,8 @@
 #include "ITG3200.h"
 #include "IMU.h"
 
-BMA180 accelerometers;
-ITG3200 gyroscopes;
+BMA180 accelerometer;
+ITG3200 gyroscope;
 IMU imu;
 
 void setup()
@@ -13,11 +13,11 @@ void setup()
   Serial.begin(115200);
   Wire.begin();
   
-  accelerometers.Configure();
-  //accelerometers.Calibrate();
+  accelerometer.Configure();
+  //accelerometer.Calibrate();
   
-  gyroscopes.Configure();
-  gyroscopes.Calibrate();
+  gyroscope.Configure();
+  gyroscope.Calibrate();
 }
 
 void loop()
@@ -28,15 +28,18 @@ void loop()
   vector3f velocity;
   
   //1 - On récupère les valeurs des capteurs
-  accelerometers.UpdateData(true,false);
-  gyroscopes.UpdateData();
+  accelerometer.Read();
+  gyroscope.UpdateData();
+  
+  //2 - Nettoyage des données
+  accelerometer.ProcessData();
   
   //La valeur de l'accéléromètre orienté verticalement au repos doit être 1000 (=1G)
   //Les valeurs des accéléromètres sont en mg
-  accdata = accelerometers.GetAcceleration();
+  accdata = accelerometer.GetAcceleration();
   //Les valeurs des gyroscopes au repos doivent être 0
   //Les valeurs des gyros doivent être en degrees/s
-  gyrodata = gyroscopes.GetGyroData();
+  gyrodata = gyroscope.GetGyroData();
     
   //2 - On met à jour les valeurs calculées par la centrale inertielle
   imu.Update(gyrodata,accdata);
