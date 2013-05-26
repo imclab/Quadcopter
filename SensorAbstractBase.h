@@ -2,7 +2,6 @@
 //This file is part of the "Overdrivr/Quadcopter autopilot"
 //For conditions of distribution and use, see copyright notice in Config.hpp
 
-
 #ifndef SENSORABSTRACTBASE_H
 #define SENSORABSTRACTBASE_H
 
@@ -20,7 +19,7 @@ class SensorAbstractBase
   virtual void ProcessData() = 0;
   virtual void Read() = 0;
 
-  private :
+  protected :
 
   long int readingsCount;
 

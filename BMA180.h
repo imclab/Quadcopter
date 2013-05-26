@@ -9,20 +9,20 @@
 
 #include "structures.h"
 #include <Arduino.h>
+#include "AccelerometerAbstractBase.h"
 
-class BMA180
+class BMA180 : public SensorAbstractBase
 {
   public :
   BMA180();
   ~BMA180();
-  /*** Configure le capteur ***/
+ 
   void Configure();
-  /*** Pour calibrer l'accelerometre ***/
   void Calibrate();
-  /*** Pour tester si les capteurs sont actifs ***/
-  boolean IsActive();
-  /*** A appeller à chaque loop pour maj les données ***/
-  void UpdateData(boolean readAcceleration, boolean readTemperature);
+  boolean IsAlive() const;
+  void ProcessData();
+  void Read();
+  
   /*** Renvoie les dernières valeurs connues d'accélération ***/
   vector3f GetAcceleration();
   /*** Renvoie la température du capteur ***/
