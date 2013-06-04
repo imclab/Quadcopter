@@ -11,6 +11,8 @@
 #include <Arduino.h>
 #include "AccelerometerAbstractBase.h"
 
+/// Implementation for Bosch BMA180 3 axis I2C accelerometer
+
 class BMA180 : public AccelerometerAbstractBase
 {
   public :

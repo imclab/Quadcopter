@@ -9,6 +9,21 @@
 #include <Arduino.h>
 #include "SensorAbstractBase.h"
 
+/// Base class for Accelerometer sensor
+/// Inherits Sensor Base class
+/// Should be inherited by any Accelerometer implementation, 
+/// and the following inherited member functions should be implemented in that inherited class :
+/// - void Configure();
+/// - void Calibrate();
+/// - long int GetReadingsCount() const;
+/// - boolean IsAlive() const;
+/// - void ProcessData();
+/// - void Read();
+/// - vector3f GetAcceleration() const;
+
+/// This way the standard IMU class provided in this library
+/// can work with any accelerometer, regardless of internal implementation details
+
 class AccelerometerAbstractBase : public SensorAbstractBase
 {
   public :
