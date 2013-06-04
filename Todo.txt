@@ -1,0 +1,2 @@
+Replace C-structure by C++ Nazara classes for math vector
+Add Quaternion class from Nazara

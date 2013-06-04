@@ -8,6 +8,7 @@
 #include "structures.h"
 #include <Arduino.h>
 #include "SensorAbstractBase.h"
+#include <stack>
 
 /// Base class for any gyroscope sensor manager
 /// Inherits Sensor Base class
@@ -29,11 +30,14 @@ class GyroscopeAbstractBase : public SensorAbstractBase
   public :
   
   // Unit : deg/s
-  virtual vector3f GetAngularRotation() const;
+  virtual vector3f GetAngularVelocity() const;
+  // Unit : deg
+  virtual vector3f GetIntegratedAngles() const;
 
   protected :
   
-  vector3f m_angularRotation;
+  std::stack<vector3f> m_angularVelocity;//Utiliser pile à taille fixe... tuple ? tmax = 6
+  vector3f m_integratedAngles;
 
 };
 

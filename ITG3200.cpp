@@ -3,18 +3,22 @@
 
 ITG3200::ITG3200()
 {
+  /*
+  CODE MANQUANT ICI
   for(int i(0) ; i < 4 ; ++i)
   {
   gyroData[i].x = 0;
   gyroData[i].y = 0;
   gyroData[i].z = 0;
-  }
-  gyroZero.x = 0;
-  gyroZero.y = 0;
-  gyroZero.z = 0;
-  gyroAngles.x = 0;
-  gyroAngles.y = 0;
-  gyroAngles.z = 0;
+  }*/
+  
+  m_angularVelocityZero.x = 0;
+  m_angularVelocityZero.y = 0;
+  m_angularVelocityZero.z = 0;
+  
+  m_integratedAngles.x = 0;
+  m_integratedAngles.y = 0;
+  m_integratedAngles.z = 0;
   
   currentTime = millis();
   previousTime = currentTime;
@@ -56,23 +60,34 @@ void ITG3200::Configure()
   delay(20);
 }
 
-void ITG3200::UpdateData()
+void ITG3200::Calibrate()
 {
-  //preAdata = adata;
-  //preAccAngles = accAngles;
-  currentTime = millis();
-  looptime = currentTime-previousTime;
-  previousTime = currentTime;
-  //Lecture du Gyro
-  this->ReadRawAngularRotation();
+  static long int sumx = 0, sumy = 0, sumz = 0;
+  static int nbsamples = 100;
+  
+  for(int i(0) ; i < nbsamples ; ++i)
+  {
+     Read();
+     sumx += m_angularVelocity[0].x;
+     sumy += m_angularVelocity[0].y;
+     sumz += m_angularVelocity[0].z;
+     delay(10);// Less delay ?
+  }
+  m_angularVelocityZero.x = static_cast<float>(sumx) / nbsamples;
+  m_angularVelocityZero.y = static_cast<float>(sumy) / nbsamples;
+  m_angularVelocityZero.z = static_cast<float>(sumz) / nbsamples;
+}
+
+void ITG3200::ProcessData()
+{
   //Zéro du gyro
-  gyroData[0].x -= gyroZero.x;
-  gyroData[0].y -= gyroZero.y;
-  gyroData[0].z -= gyroZero.z;
+  m_angularVelocity[0].x -= m_angularVelocityZero.x;
+  m_angularVelocity[0].y -= m_angularVelocityZero.y;
+  m_angularVelocity[0].z -= m_angularVelocityZero.z;
   //Integration
-  gyroAngles.x += RK4Integrate(gyroData[3].x, gyroData[2].x, gyroData[1].x, gyroData[0].x, looptime);
-  gyroAngles.y += RK4Integrate(gyroData[3].y, gyroData[2].y, gyroData[1].y, gyroData[0].y, looptime);
-  gyroAngles.z += RK4Integrate(gyroData[3].z, gyroData[2].z, gyroData[1].z, gyroData[0].z, looptime);
+  m_integratedAngles.x += RK4Integrate(gyroData[3].x, gyroData[2].x, gyroData[1].x, gyroData[0].x, looptime);
+  m_integratedAngles.y += RK4Integrate(gyroData[3].y, gyroData[2].y, gyroData[1].y, gyroData[0].y, looptime);
+  m_integratedAngles.z += RK4Integrate(gyroData[3].z, gyroData[2].z, gyroData[1].z, gyroData[0].z, looptime);
 }
 
 byte ITG3200::IsActive()
@@ -90,32 +105,6 @@ byte ITG3200::IsActive()
   //Serial.println(outbuf[0],HEX);
   
   return outbuf[0];
-}
-
-void ITG3200::Calibrate()
-{
-  
-  long int sumx = 0, sumy = 0, sumz = 0;
-  int nbsamples = 100;
-  for(int i(0) ; i < nbsamples ; ++i)
-  {
-     this->ReadRawAngularRotation();
-     sumx += gyroData[0].x;
-     sumy += gyroData[0].y;
-     sumz += gyroData[0].z;
-     delay(10);
-  }
-  
-  gyroZero.x = sumx/nbsamples;
-  gyroZero.y = sumy/nbsamples;
-  gyroZero.z = sumz/nbsamples;
-  
-  Serial.print("Cal Gyr :");
-  Serial.print(gyroZero.x);
-  Serial.print(",");
-  Serial.print(gyroZero.y);
-  Serial.print(",");
-  Serial.println(gyroZero.z);
 }
 
 vector3f ITG3200::GetGyroData()
@@ -136,7 +125,11 @@ float ITG3200::RK4Integrate(int data4, int data3, int data2, int data1, int delt
 
 void ITG3200::ReadRawAngularRotation()
 {
-  TWBR = ((16000000L / 400000L) - 16) / 2; // change the I2C clock rate to 400kHz
+  
+  
+  
+  // change the I2C clock rate to 400kHz... useful ?
+  TWBR = ((16000000L / 400000L) - 16) / 2; 
   //Gyro en lecture
   Wire.beginTransmission(0x69);
   //Adresse de debut des donnees gyro
@@ -152,6 +145,7 @@ void ITG3200::ReadRawAngularRotation()
   outbuf[4] = Wire.read();
   outbuf[5] = Wire.read();
   
+  //Utiliser une pile à taille fixe à la place, plus efficace
   gyroData[3].x = gyroData[2].x;
   gyroData[3].y = gyroData[2].y;
   gyroData[3].z = gyroData[2].z;
@@ -164,7 +158,11 @@ void ITG3200::ReadRawAngularRotation()
   gyroData[1].y = gyroData[0].y;
   gyroData[1].z = gyroData[0].z;
   
-  //ERREUR MULTIWII ICI ?
+  currentTime = millis();
+  looptime = currentTime-previousTime;
+  previousTime = currentTime;
+  
+  //A VERIFIER
   //16 bits -> +- 32768 -> -+ 2000°/s
   gyroData[0].x =  ((outbuf[0] << 8) | outbuf[1])/14;
   gyroData[0].y = -((outbuf[2] << 8) | outbuf[3])/14;

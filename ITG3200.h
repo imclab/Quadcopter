@@ -3,45 +3,44 @@
 
 #include "structures.h"
 #include <Arduino.h>
+#include "GyroscopeAbstractBase.h"
 
-class ITG3200
+/// Invensense ITG3200 3 axis I2C Accelerometer
+
+class ITG3200 : public GyroscopeAbstractBase
 {
   public :
   ITG3200();
   ~ITG3200();
-  /*** Initialise les capteurs ***/
+ 
   void Configure();
-  /*** Pour calibrer le gyro ***/
   void Calibrate();
-  /*** Pour tester si les capteurs sont actifs ***/
-  byte IsActive();
-  
-  /*** A appeller à chaque loop pour maj les données ***/
-  void UpdateData();
-  
-  /*** Renvoie la dernière valeur connue des données du gyro ***/
-  vector3f GetGyroData();
-  /*** Renvoie la valeur d'angle produite par intégration ***/
-  vector3f GetGyroAngles();
+  boolean IsActive();
+  void ProcessData();
+  void Read();
+
+  vector3f GetAngularVelocity();
+  vector3f GetIntegratedAngles();
   
   /*** Integration runge kutta 4 ***/
+  // TODO : A VIRER DE LA
+  // options : 1 seule méthode d'appel à l'integrateur (possible faire functor pour conserver état dernière intégration)
+  // float Integrator(int data*, int timeIntervals*);
   float RK4Integrate(int data4, int data3, int data2, int data1, int deltaTmillis);
-  
-  //Pour lire les valeurs brutes du gyro
-  void ReadRawAngularRotation();
+ 
   
   private :
   
-  vector3f gyroData[4];
-  vector3f gyroZero;
-  vector3f gyroAngles;
+  //vector3f gyroData[4];
+  vector3f m_angularVelocityZero;
+  //vector3f gyroAngles;
   
   int previousTime;
   int currentTime;
   int looptime;
   
   //Le buffer de reception
-  byte outbuf[6];
+  byte outbuf[6];//declarer static ds methode directement
   
   long int measuresCount;
 };
