@@ -2,16 +2,16 @@
 //This file is part of the "Overdrivr/Quadcopter autopilot"
 //For conditions of distribution and use, see copyright notice in Config.hpp
 
-#ifndef ACCELEROMETERABSTRACTBASE_H
-#define ACCELEROMETERABSTRACTBASE_H
+#ifndef GYROSCOPEABSTRACTBASE_H
+#define GYROSCOPEABSTRACTBASE_H
 
 #include "structures.h"
 #include <Arduino.h>
 #include "SensorAbstractBase.h"
 
-/// Base class for any accelerometer sensor manager
+/// Base class for any gyroscope sensor manager
 /// Inherits Sensor Base class
-/// Should be inherited by any Accelerometer implementation, 
+/// Should be inherited by any gyroscope implementation, 
 /// and the following inherited member functions should be implemented in that inherited class :
 /// - void Configure();
 /// - void Calibrate();
@@ -19,21 +19,21 @@
 /// - boolean IsAlive() const;
 /// - void ProcessData();
 /// - void Read();
-/// - vector3f GetAcceleration() const;
+/// - vector3f GetAngularRotation() const;
 
 /// This way the standard IMU class provided in this library
 /// can work with any accelerometer, regardless of internal implementation details
 
-class AccelerometerAbstractBase : public SensorAbstractBase
+class GyroscopeAbstractBase : public SensorAbstractBase
 {
   public :
   
-  // Unit : mG (1 G ~= 9.89 m/s²) 
-  virtual vector3f GetAcceleration() const;
+  // Unit : deg/s
+  virtual vector3f GetAngularRotation() const;
 
   protected :
   
-  vector3f m_acceleration;
+  vector3f m_angularRotation;
 
 };
 
